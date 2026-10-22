@@ -36,6 +36,7 @@ test('Cancel retains the conversation; Discard closes and the next launch is emp
   const profile=await folder(); let running=await start(profile); t.after(()=>exit(running.app));
   await load(running.page);
   const url=running.page.url();
+  assert.equal(await running.app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].isVisible()),true);
   assert.equal(await running.app.evaluate(({app})=>app.commandLine.hasSwitch('no-sandbox')),false);
   assert.equal(await running.app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].webContents.getLastWebPreferences().sandbox),true);
   await select(running.app,4); await request(running.app);
@@ -126,4 +127,19 @@ test('native window reads PDF, Word, Markdown and Excel through its local parser
   await running.page.locator('#apply-context-files').click();
   const text=await running.page.locator('#context').inputValue();
   assert.match(text,/\[Page 1\]/);assert.match(text,/বাংলা/);assert.match(text,/\[Sheet: Rules\]/);
+});
+
+test('closing after real inference releases the model and a fresh launch starts its server', {timeout:45000},async t=>{
+  const profile=await folder();let running=await start(profile);t.after(()=>exit(running.app));
+  const url=running.page.url();
+  const response=await fetch(`${url}api/decide`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(example.runs[0].input)});
+  assert.equal(response.status,200);await response.json();
+  const loaded=await (await fetch('http://127.0.0.1:11434/api/ps')).json();
+  assert.ok(loaded.models.some(model=>model.name===example.draft.model));
+  await exit(running.app);
+  await assert.rejects(fetch(`${url}api/health`,{signal:AbortSignal.timeout(1500)}));
+  const after=await (await fetch('http://127.0.0.1:11434/api/ps')).json();
+  assert.ok(!after.models.some(model=>model.name===example.draft.model));
+  running=await start(profile);
+  assert.equal((await fetch(`${running.page.url()}api/health`)).status,200);
 });

@@ -53,7 +53,7 @@ function json(res, code, value) {
   res.end(JSON.stringify(value));
 }
 
-export function createApp({ fetchOllama = fetch, instanceId = null, onActivate = null } = {}) {
+export function createApp({ fetchOllama = fetch, instanceId = null, onActivate = null, onModelUsed = null } = {}) {
   return http.createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -124,6 +124,7 @@ export function createApp({ fetchOllama = fetch, instanceId = null, onActivate =
         let input;
         try { input = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new InputError('Invalid JSON request.'); }
         const payload = buildRequest(input);
+        onModelUsed?.(payload.model);
         const controller = new AbortController();
         const stop = () => { if (!res.writableEnded) controller.abort(); };
         res.once('close', stop);

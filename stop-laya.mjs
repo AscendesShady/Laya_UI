@@ -2,6 +2,8 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { MODELS } from './server.mjs';
+import { unloadSessionModels } from './ollama-session.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 // Identify this checkout by its Electron executable, then include only its
@@ -49,6 +51,7 @@ try {
     cwd:root, env:{...process.env,LAYA_STOP_ROOT:root}, windowsHide:true, timeout:30000,
   });
   console.log(stdout.trim());
+  await unloadSessionModels(MODELS);
 } catch (error) {
   console.error(`Could not stop Laya: ${error.stderr?.trim() || error.message}`);
   process.exitCode = 1;

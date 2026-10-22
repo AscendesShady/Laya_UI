@@ -6,11 +6,13 @@ const { pathToFileURL } = require('node:url');
 
 app.setName('Laya Decision Studio');
 const profileArg = process.argv.find(arg => arg.startsWith('--profile='));
-const profile = profileArg ? path.resolve(profileArg.slice('--profile='.length)) : path.join(__dirname, '.laya-browser', 'native');
+const profile = profileArg ? path.resolve(profileArg.slice('--profile='.length)) : process.env.LAYA_PROFILE ? path.resolve(process.env.LAYA_PROFILE) : path.join(__dirname, '.laya-browser', 'native');
 mkdirSync(profile, { recursive: true }); app.setPath('userData', profile);
 app.enableSandbox();
 
 let win, server, origin, exitApproved = false, closeInProgress = false, saveInProgress = false, stoppingServer;
+let shutdownPromise,shutdownComplete=false,pendingClose=false,pendingForce=false,uiReady=false;
+const usedModels=new Set();
 const importLocal = name => import(pathToFileURL(path.join(__dirname,name)).href);
 function stopServer() {
   if (!stoppingServer) stoppingServer = new Promise(resolve => {
@@ -19,6 +21,31 @@ function stopServer() {
   });
   return stoppingServer;
 }
+function shutdown() {
+  if(!shutdownPromise)shutdownPromise=(async()=>{
+    console.log('Stopping Laya UI server...');
+    await stopServer();
+    const {unloadSessionModels}=await importLocal('ollama-session.mjs');
+    await unloadSessionModels(usedModels);
+  })().catch(error=>console.error(`Shutdown cleanup: ${error.message}`)).finally(()=>{
+    shutdownComplete=true;console.log('Laya closed. UI server stopped.');
+  });
+  return shutdownPromise;
+}
+function closeFromLauncher(force=false) {
+  if(!uiReady){pendingClose=true;pendingForce ||= force;return;}
+  if(!win||win.isDestroyed())return;
+  if(force) {
+    exitApproved=true;
+    // Force-close must also work when the renderer cannot answer JavaScript.
+    void win.webContents.executeJavaScript('window.layaClearConversation()').catch(()=>{});
+    win.destroy();
+  } else if(win&&!win.isDestroyed()) {win.show();win.focus();win.close();}
+}
+process.on('message',message=>{
+  if(message?.type==='laya-close')closeFromLauncher();
+  if(message?.type==='laya-force-close')closeFromLauncher(true);
+});
 function allowed(event) { return win && event.sender === win.webContents && event.senderFrame === win.webContents.mainFrame && event.senderFrame.url.startsWith(`${origin}/`); }
 async function snapshot(abort = false) {
   const data = await win.webContents.executeJavaScript(abort ? 'window.layaPrepareToClose()' : 'window.layaSessionData()');
@@ -77,7 +104,10 @@ if (!app.requestSingleInstanceLock()) {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.show(); win.focus(); } });
   app.whenReady().then(async () => {
     const { startApp } = await importLocal('server.mjs');
-    const running = await startApp({port:Number(process.env.PORT || 3210),reuse:false}); server = running.server; origin = running.url;
+    const running = await startApp({port:Number(process.env.PORT || 3210),reuse:false,
+      appOptions:{onModelUsed:model=>usedModels.add(model)},
+      log:message=>console.log(message.replace('Press Ctrl+C to stop.','Close the Laya window to stop.')),
+    }); server = running.server; origin = running.url;
     win = new BrowserWindow({ width:1440,height:1000,minWidth:760,minHeight:600,show:false,title:'Laya Decision Studio',backgroundColor:'#f7f7fb',
       webPreferences:{ preload:path.join(__dirname,'desktop-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false },
     });
@@ -95,10 +125,15 @@ if (!app.requestSingleInstanceLock()) {
     ipcMain.on('laya:close', event => { if (allowed(event)) win.close(); });
     win.once('ready-to-show', () => win.show());
     await win.loadURL(origin);
+    uiReady=true;win.show();win.focus();
     console.log('Laya ready. Closing the window offers Save JSON, Save Excel, Save Both, Discard, or Cancel.');
-  }).catch(async error => { dialog.showErrorBox('Laya could not start',error.message); await stopServer(); app.exit(1); });
+    if(pendingClose)closeFromLauncher(pendingForce);
+  }).catch(async error => { dialog.showErrorBox('Laya could not start',error.message); await shutdown(); app.exit(1); });
   app.on('before-quit', event => {
-    if (win && !win.isDestroyed() && !exitApproved) { event.preventDefault(); win.close(); }
+    if(shutdownComplete)return;
+    event.preventDefault();
+    if(win&&!win.isDestroyed()&&!exitApproved)win.close();
+    else void shutdown().then(()=>app.quit());
   });
-  app.on('window-all-closed', () => { void stopServer().then(() => app.quit()); });
+  app.on('window-all-closed', () => { void shutdown().then(() => app.quit()); });
 }

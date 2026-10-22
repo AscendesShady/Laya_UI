@@ -4,6 +4,7 @@ from pathlib import Path
 import argparse
 import subprocess
 import sys
+import shutil
 
 
 def main(argv=()) -> int:
@@ -14,14 +15,36 @@ def main(argv=()) -> int:
     if sys.platform != "win32":
         print("This launcher requires Windows. Use node desktop.mjs on other platforms.", file=sys.stderr)
         return 1
-    command = "Stop-Laya.cmd" if args.stop else "Start-Laya.cmd"
-    if not (project_dir / command).is_file():
-        print(f"{command} is missing from the project folder.", file=sys.stderr)
+    script = project_dir / ("stop-laya.mjs" if args.stop else "desktop.mjs")
+    if not script.is_file():
+        print(f"{script.name} is missing from the project folder.", file=sys.stderr)
+        return 1
+    node = shutil.which("node")
+    if not node:
+        print("Node.js 22.3 or newer is required. Install it, then run Laya again.", file=sys.stderr)
         return 1
     try:
-        return subprocess.call(["cmd.exe", "/d", "/c", f".\\{command}"], cwd=project_dir)
-    except KeyboardInterrupt:
-        return 130
+        # Isolate the child console group so Ctrl+C reaches this launcher once,
+        # then ask the app to close through a pipe, preserving its save dialog.
+        child = subprocess.Popen([node, str(script)], cwd=project_dir,
+                                 stdin=subprocess.PIPE, text=True,
+                                 creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
+        interrupts = 0
+        while True:
+            try:
+                return child.wait(timeout=0.2)
+            except subprocess.TimeoutExpired:
+                continue
+            except KeyboardInterrupt:
+                interrupts += 1
+                command = "close" if interrupts == 1 else "force-close"
+                print("Close Laya using the save dialog." if interrupts == 1 else "Stopping Laya and discarding unsaved work.", flush=True)
+                if child.poll() is None and child.stdin:
+                    try:
+                        child.stdin.write(command + "\n")
+                        child.stdin.flush()
+                    except (BrokenPipeError, OSError):
+                        pass
     except OSError as error:
         print(f"Could not launch Laya: {error}", file=sys.stderr)
         return 1
