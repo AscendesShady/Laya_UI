@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.browser-test-profile/
+__pycache__/
+.laya-browser/
+verification/
+test-results/
+playwright-report/
+.env
+.env.*

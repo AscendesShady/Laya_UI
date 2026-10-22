@@ -1,0 +1,36 @@
+{
+  "name": "laya-decision-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A local decision playground for two Laya models in Ollama.",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node desktop.mjs",
+    "stop": "node stop-laya.mjs",
+    "start:web": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:live": "node scripts/verify-live.mjs",
+    "test:ui": "playwright test"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "jszip": "^3.10.2"
+  },
+  "dependencies": {
+    "electron": "^45.0.0",
+    "exceljs": "^4.4.0",
+    "pdf-parse": "^2.4.5",
+    "playwright-core": "^1.64.1",
+    "word-extractor": "^1.0.4",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yauzl": "^3.4.0"
+  }
+}

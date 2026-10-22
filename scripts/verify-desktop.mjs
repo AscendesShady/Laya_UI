@@ -1,0 +1,17 @@
+import { _electron } from 'playwright-core';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+await mkdir('verification/native-tests',{recursive:true});
+const profile=await mkdtemp(path.resolve('verification/native-tests/visible-'));
+const env={...process.env,PORT:'3320'};delete env.ELECTRON_RUN_AS_NODE;
+const app=await _electron.launch({args:[path.resolve('desktop-main.cjs'),`--profile=${profile}`],env});
+const page=await app.firstWindow();await page.locator('#tab-home').waitFor();
+const url=page.url();
+await page.screenshot({path:'verification/app-window.png'});
+await app.evaluate(({dialog})=>{dialog.showMessageBox=async()=>({response:3});});
+const closed=app.waitForEvent('close');
+await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows()[0].close());await closed;
+await assert.rejects(fetch(url,{signal:AbortSignal.timeout(1500)}));
+await writeFile('verification/window-lifecycle.json',JSON.stringify({verifiedAt:new Date().toISOString(),nativeWindow:true,serverStoppedAfterClose:true,url},null,2));
+console.log('Native window closed and its server stopped.');

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#7550d8"><meta name="description" content="Your private, local playground for structured decisions with Laya.">
+  <title>Laya — Decision Studio</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/styles.css"><script src="/app.js" type="module"></script>
+</head>
+<body>
+<a class="skip-link" href="#question">Skip to decision form</a>
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Zm7-1v4m-2-2h4"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 2 7M3 5v6h6m3-4v6l4 2"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5v16M3 3c4 0 6 0 9 2 3-2 5-2 9-2v16c-4 0-6 0-9 2-3-2-5-2-9-2V3Z"/></symbol>
+  <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m8 5 7 7-7 7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-rank" viewBox="0 0 24 24"><path d="M8 5h12M8 12h8M8 19h4M3 4v16m-2-2 2 2 2-2"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><path d="M11 6h10M11 18h10M5 8v8"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M5 3v18M12 3v18M19 3v18M2 8h6m1 8h6m1-10h6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 4-4 7-8 9-4-2-8-5-8-9V6l8-3Z"/><path d="m8 12 3 3 5-6"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7a9 9 0 0 0-15-2L2 8m0-6v6h6m-4 9a9 9 0 0 0 15 2l3-3m0 6v-6h-6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m3 6 9 7 9-7"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M21 11a8 8 0 0 1-8 8H8l-5 3V11a9 9 0 0 1 18 0Z"/><path d="M8 10h8m-8 4h5"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-13h-8l1-7Z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+</defs></svg>
+<aside class="sidebar">
+  <a href="#panel-home" data-home-link class="brand" aria-label="Laya Decision Studio home"><img src="/favicon.svg" alt="" width="40" height="40"><span>laya<span class="brand-dot">.</span><small>DECISION STUDIO</small></span></a>
+  <button class="new-button" id="new-decision"><svg class="icon"><use href="#i-plus"/></svg>New decision<span class="shortcut">N</span></button>
+
+  <div class="history-heading"><span>RECENT DECISIONS</span><button id="clear-history" class="icon-button" aria-label="Clear saved decision history" title="Clear history"><svg class="icon"><use href="#i-close"/></svg></button></div>
+  <div id="history" class="history-list"><p class="history-empty">A little history, once you<br>make your first decision.</p></div>
+  <div class="sidebar-bottom">
+    <p class="save-setting">Conversations clear on exit. Save a file to keep them.</p>
+    <div class="local-card"><span class="local-icon"><svg class="icon"><use href="#i-shield"/></svg></span><div><strong>Local by design</strong><p>Your text stays on this computer.</p></div></div>
+    <div class="connection"><span class="status-dot" id="status-dot"></span><span id="connection-text">Connecting to Ollama…</span><button id="refresh" class="icon-button" aria-label="Refresh Ollama connection"><svg class="icon"><use href="#i-refresh"/></svg></button></div>
+  </div>
+</aside>
+<main id="workspace">
+  <header class="topbar"><div class="breadcrumb">Workspace <span>/</span> <strong id="active-section">Home</strong></div><span class="local-badge"><span></span>LOCAL INFERENCE</span></header>
+  <div class="app-controls">
+    <div class="app-tabs" role="tablist" aria-label="Workspace tabs">
+      <button id="tab-home" role="tab" aria-selected="true" aria-controls="panel-home" tabindex="0" data-tab="home">Home</button>
+      <button id="tab-templates" role="tab" aria-selected="false" aria-controls="panel-templates" tabindex="-1" data-tab="templates">Templates <span class="count-badge">6</span></button>
+      <button id="tab-help" role="tab" aria-selected="false" aria-controls="panel-help" tabindex="-1" data-tab="help">Help</button>
+    </div>
+    <div class="file-actions" role="group" aria-label="Conversation files">
+      <button id="save-json" class="secondary-button">Save JSON</button>
+      <button id="load-json" class="secondary-button">Load JSON</button>
+      <button id="export-excel" class="secondary-button">Export Excel</button>
+      <input id="load-file" type="file" accept=".json,application/json" hidden>
+    </div>
+  </div>
+  <div class="main-content">
+    <section id="panel-home" role="tabpanel" aria-labelledby="tab-home">
+    <section class="intro"><div><div class="eyebrow"><span></span>LESS GUESSWORK. MORE CLARITY.</div><h1>Big questions.<br><span>Clearer decisions.</span></h1><p>Give Laya the context. Set the possibilities.<br>Get a decision you can actually work with.</p></div><div class="intro-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-tile tile-one"><svg class="icon"><use href="#i-list"/></svg></div><div class="art-tile tile-two"><svg class="icon"><use href="#i-check"/></svg></div><div class="art-core"><svg><use href="#i-spark"/></svg></div><span class="art-dot dot-one"></span><span class="art-dot dot-two"></span></div></section>
+    <div class="workspace-grid">
+      <section class="panel setup-panel" aria-labelledby="setup-title">
+        <div class="panel-header"><div class="title-with-icon"><span class="panel-icon"><svg class="icon"><use href="#i-sliders"/></svg></span><h2 id="setup-title">Set up your decision</h2></div><span class="small-caps">01 — INPUT</span></div>
+        <form id="decision-form" novalidate>
+          <fieldset id="form-fields">
+            <div class="field-group"><label for="model">Model<span class="field-meta">421M · BF16</span></label><div class="model-select"><span class="model-glyph"><svg class="icon"><use href="#i-spark"/></svg></span><select id="model"><option value="laya:421m-typed-decisions-bf16">Laya · Typed Decisions</option><option value="laya:421m-english-bf16">Laya · English</option></select></div><p class="field-hint" id="model-hint">Specialized for structured decision workflows.</p></div>
+            <div class="field-group"><label id="type-label">Decision type</label><div class="type-switch" role="group" aria-labelledby="type-label">
+              <button type="button" data-type="bool" aria-pressed="false"><svg class="icon"><use href="#i-check"/></svg>Bool</button>
+              <button type="button" data-type="choice" class="selected" aria-pressed="true"><svg class="icon"><use href="#i-list"/></svg>Choice</button>
+              <button type="button" data-type="ranking" aria-pressed="false"><svg class="icon"><use href="#i-rank"/></svg>Ranking</button>
+            </div><p id="type-hint" class="field-hint">Pick the best fit from your answer options.</p></div>
+            <div class="field-group"><label for="question">Your question <span class="required">*</span></label><textarea id="question" rows="2" maxlength="2000" placeholder="What would you like Laya to decide?" aria-describedby="question-error" required></textarea><p class="field-error" id="question-error"></p></div>
+            <div class="field-group context-group"><label for="context">Context <span class="required">*</span><span class="field-meta" id="context-count">0 characters</span></label><textarea id="context" rows="4" maxlength="24000" placeholder="Paste the text, situation, or facts Laya should evaluate…" aria-describedby="context-hint context-error" required></textarea><div class="context-file-tools"><button type="button" id="add-context-files" class="secondary-button"><svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>Add files</button><span>PDF, Word, Markdown, Excel or text<br>Up to 5 files &middot; 10 MB each</span><input id="context-files" type="file" accept=".pdf,.docx,.doc,.md,.markdown,.txt,.xlsx,.xls,.xlsm,.csv" multiple hidden></div><p class="field-hint" id="context-hint">The evidence for your decision. Keep it focused and concise.</p><p class="field-error" id="context-error"></p></div>
+            <div class="field-group options-group"><div class="field-label-row"><label id="options-label">Answer options <span id="option-count" class="count-badge">4</span></label><span class="field-meta" id="options-limit">2–26 options</span></div><div id="options-list" role="group" aria-labelledby="options-label" aria-describedby="options-hint"></div><button type="button" id="add-option" class="add-option-row"><span class="add-option-symbol" aria-hidden="true"><svg class="icon"><use href="#i-plus"/></svg></span><span id="add-option-label">Add option</span></button><p class="field-hint" id="options-hint">Type your own answers. Press Enter to add another option.</p></div>
+          </fieldset>
+          <div id="form-error" class="error-banner" role="alert" hidden></div>
+          <div class="form-actions"><span class="keyboard-hint">Ctrl / ⌘ + Enter to run</span><button type="button" id="cancel" class="secondary-button" hidden>Cancel</button><button type="submit" id="run" class="primary-button"><svg class="icon"><use href="#i-spark"/></svg><span>Make a decision</span><svg class="icon"><use href="#i-arrow"/></svg></button></div>
+        </form>
+      </section>
+      <section class="output-column" aria-labelledby="output-title">
+        <div class="panel output-panel"><div class="panel-header"><div class="title-with-icon"><span class="panel-icon pink"><svg class="icon"><use href="#i-chat"/></svg></span><h2 id="output-title">The decision room</h2></div><span class="small-caps">02 — OUTPUT</span></div>
+          <div id="decision-feed" aria-busy="false"><div class="empty-output"><div class="empty-symbol" aria-hidden="true"><svg><use href="#i-spark"/></svg><span class="little-spark">+</span></div><span class="empty-eyebrow">A CLEARER NEXT STEP</span><h3>Ready when you are.</h3><p>Your decision will appear here, with a<br class="desktop-break"> probability for every possibility.</p><div class="empty-steps"><span><i>1</i>Add context</span><svg class="icon"><use href="#i-chevron"/></svg><span><i>2</i>Ask Laya</span><svg class="icon"><use href="#i-chevron"/></svg><span><i>3</i>Get clarity</span></div></div></div>
+          <div class="output-footer"><svg class="icon"><use href="#i-shield"/></svg>Runs on your Ollama. No API key. No cloud.</div>
+        </div>
+
+        <p class="decision-note"><svg class="icon"><use href="#i-book"/></svg>Laya evaluates the evidence you provide. A probability is a model estimate, not a guarantee.</p>
+      </section>
+    </div>
+    </section>
+    <section id="panel-templates" role="tabpanel" aria-labelledby="tab-templates" hidden>
+      <div class="tab-heading"><span class="eyebrow">YOUR STARTER LIBRARY</span><h1>Decision templates</h1><p>Choose one of the six examples, then edit its question, context, and answers on Home.</p></div>
+      <div id="preset-grid" class="preset-grid"></div>
+    </section>
+    <section id="panel-help" role="tabpanel" aria-labelledby="tab-help" hidden><div class="panel help-panel"><h2>How Laya works</h2><div class="guide-content"><p>Laya reads your context and evaluates the possibilities you define. Every run is independent; previous messages are not added to its context.</p><dl><dt>Bool · Yes or no</dt><dd>Returns the probability of true using Laya’s <code>noul</code> type. Edit the descriptions of both sides to define what counts. A 50% split is shown as a tie.</dd><dt>Choice · Pick one</dt><dd>Returns one label and a probability for each option. Labels should be distinct and descriptions should explain when they apply.</dd><dt>Ranking · Compare alternatives</dt><dd>Uses a choice distribution, displayed from highest to lowest probability. The probabilities compare these options with each other; they are not independent quality scores.</dd></dl><h3>Make the input count</h3><p>Provide relevant facts, not just a question. Keep labels short and options few. The published default context is 1,024 tokens for Typed Decisions and 512 for English, including the question and options. Longer inputs may be truncated by the runtime. Character counts are not token counts.</p><p>Confidence describes how concentrated the distribution is. It does not measure the chance of being correct. Validate decisions on your own examples; the English checkpoint can be sensitive to boolean wording.</p><h3>Context from files</h3><p>Use Add files below Context to read PDF, Word (.docx/.doc), Markdown, text, and Excel (.xlsx/.xls/.xlsm/.csv) files locally. Review and edit the extracted text, then append it or replace Context. The extracted text is included when you save JSON or Excel. PDF images need OCR first; spreadsheet formulas use saved values and are not recalculated. Imports accept up to 5 files, 10 MB each, with 200 pages per PDF and 200,000 extracted characters per file. Trim long previews to fit the 24,000-character Context field and the selected model's smaller token budget.</p><h3>Save and resume</h3><p>Save JSON stores every decision in this conversation plus your current setup. Load JSON restores them so you can continue adding decisions. Export Excel creates a workbook with decisions, probabilities, and the current setup. Each model request still uses the context you explicitly supply.</p><h3>Your workspace</h3><p>Only the two requested models are available. Recent decisions stay in this window only (up to 40 runs). Closing Laya offers Save JSON, Save Excel, Save Both, Discard, or Cancel. The conversation clears on exit; use Load JSON to resume a saved conversation. JSON export includes your context and model response.</p><div class="source-links"><a href="https://ollama.com/library/laya" target="_blank" rel="noreferrer">Ollama API & model guide ↗</a><a href="https://huggingface.co/convaiinnovations/laya" target="_blank" rel="noreferrer">Laya model card & limits ↗</a><a href="https://laya.studio/use-cases" target="_blank" rel="noreferrer">Use case research ↗</a></div></div></div></section>
+    <footer class="page-footer"><span>Small model. Thoughtful decisions.</span><span>Built for your two Laya checkpoints<span class="footer-dot">·</span>100% local</span></footer>
+  </div>
+</main>
+
+
+<dialog id="clear-dialog" aria-labelledby="clear-title"><div class="dialog-header"><h2 id="clear-title">Clear saved decisions?</h2></div><p>This removes saved runs from this browser. Your current form stays open.</p><div class="dialog-actions"><button class="secondary-button close-dialog">Keep history</button><button class="primary-button" id="confirm-clear">Clear history</button></div></dialog>
+<dialog id="import-dialog" aria-labelledby="import-title"><h2 id="import-title">Load another conversation?</h2><p>Your current conversation will be replaced. Save JSON first if you want to keep it.</p><div class="dialog-actions"><button class="secondary-button close-dialog">Cancel</button><button class="primary-button" id="confirm-import">Load conversation</button></div></dialog>
+<dialog id="context-files-dialog" aria-labelledby="context-files-title" aria-describedby="context-files-description">
+  <div class="dialog-header"><h2 id="context-files-title">Add files to context</h2><button type="button" class="icon-button close-dialog" aria-label="Close file review"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button></div>
+  <p id="context-files-description">Files are read locally. Review or shorten the extracted text before using it. Images, charts, and scanned PDF text are not included.</p>
+  <div class="context-review-body"><p id="context-file-status" role="status" aria-live="polite"></p><ul id="context-file-list"></ul>
+  <label for="context-preview">Extracted text <span class="field-meta">Editable preview</span></label><textarea id="context-preview" rows="8" aria-describedby="context-preview-count" spellcheck="false"></textarea>
+  <label for="context-import-mode">Insert text</label><select id="context-import-mode"><option value="append">Append to current context</option><option value="replace">Replace current context</option></select>
+  <p id="context-preview-count" class="field-hint" aria-live="polite"></p><p class="field-hint">Keep the relevant passages. Laya's model context limit still applies.</p>
+  </div><div class="dialog-actions"><button type="button" class="secondary-button close-dialog">Cancel</button><button type="button" class="primary-button" id="apply-context-files" disabled>Use this text</button></div>
+</dialog>
+<div id="announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="toast" class="toast" role="status" hidden></div>
+</body></html>
