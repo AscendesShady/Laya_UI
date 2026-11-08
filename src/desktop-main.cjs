@@ -6,7 +6,7 @@ const { pathToFileURL } = require('node:url');
 
 app.setName('Laya Decision Studio');
 const profileArg = process.argv.find(arg => arg.startsWith('--profile='));
-const profile = profileArg ? path.resolve(profileArg.slice('--profile='.length)) : process.env.LAYA_PROFILE ? path.resolve(process.env.LAYA_PROFILE) : path.join(__dirname, '.laya-browser', 'native');
+const profile = profileArg ? path.resolve(profileArg.slice('--profile='.length)) : process.env.LAYA_PROFILE ? path.resolve(process.env.LAYA_PROFILE) : path.join(__dirname, '..', '.laya-browser', 'native');
 mkdirSync(profile, { recursive: true }); app.setPath('userData', profile);
 app.enableSandbox();
 

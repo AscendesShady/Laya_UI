@@ -1,4 +1,4 @@
-import { createApp } from '../../server.mjs';
+import { createApp } from '../../src/server.mjs';
 import { once } from 'node:events';
 export default async function setup() {
   const server = createApp();

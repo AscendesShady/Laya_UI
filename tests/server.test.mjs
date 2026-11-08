@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
 import http from 'node:http';
-import { buildRequest, createApp, startApp, MODELS } from '../server.mjs';
+import { buildRequest, createApp, startApp, MODELS } from '../src/server.mjs';
 
 const base = { model: MODELS[0], type: 'choice', state: 'The customer needs a refund.', question: 'Which team should help?', options: [{ label: 'Billing', description: 'Payments' }, { label: 'Technical', description: '' }] };
 async function app(t, mock) {

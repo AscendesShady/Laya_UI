@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { once } from 'node:events';
-import { createApp } from '../server.mjs';
-import { extractContextFile, contextFilename, MAX_FILE_BYTES } from '../context-files.mjs';
+import { createApp } from '../src/server.mjs';
+import { extractContextFile, contextFilename, MAX_FILE_BYTES } from '../src/context-files.mjs';
 import { pdfFixture, wordFixture, excelFixture } from './context-fixtures.mjs';
 
 test('Markdown preserves Unicode, headings, and literal markup',async()=>{

@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import ExcelJS from 'exceljs';
-import { normalizeSession } from '../public/session.js';
-import { exportWorkbook } from '../workbook.mjs';
+import { normalizeSession } from '../src/public/session.js';
+import { exportWorkbook } from '../src/workbook.mjs';
 const input = { model:'laya:421m-typed-decisions-bf16', type:'choice', question:'Which action?', state:'A refund is requested.', options:[{label:'Refund',description:'Return payment'},{label:'Wait',description:'Take no action'}] };
 const run = {id:'run-1',createdAt:'2026-10-21T16:00:00.000Z',input,result:{elapsed_ms:12,answers:{decision:{choice:'Refund',probabilities:{Refund:.8,Wait:.2},confidence:.6}},usage:{input_tokens:35}}};
 const session = () => ({ format:'laya-conversation',version:1,runs:[structuredClone(run)],draft:{...structuredClone(input),question:'A follow-up question'} });

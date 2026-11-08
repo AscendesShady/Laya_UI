@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 await mkdir('verification/native-tests',{recursive:true});
 const profile=await mkdtemp(path.resolve('verification/native-tests/visible-'));
 const env={...process.env,PORT:'3320'};delete env.ELECTRON_RUN_AS_NODE;
-const app=await _electron.launch({args:[path.resolve('desktop-main.cjs'),`--profile=${profile}`],env});
+const app=await _electron.launch({args:[path.resolve('src/desktop-main.cjs'),`--profile=${profile}`],env});
 const page=await app.firstWindow();await page.locator('#tab-home').waitFor();
 const url=page.url();
 await page.screenshot({path:'verification/app-window.png'});

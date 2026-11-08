@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { buildRequest, MODELS } from '../server.mjs';
-import { validResult } from '../public/session.js';
+import { buildRequest, MODELS } from '../src/server.mjs';
+import { validResult } from '../src/public/session.js';
 
 const base = 'http://127.0.0.1:11434';
 const folder = 'verification/model-comparison-20';

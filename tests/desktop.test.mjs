@@ -10,7 +10,7 @@ const example = { format:'laya-conversation',version:1,runs:[{id:'fixture-1',cre
 const closedApps = new WeakSet();
 async function start(profile) {
   const env={...process.env,PORT:'3330'}; delete env.ELECTRON_RUN_AS_NODE;
-  const app=await _electron.launch({args:[path.resolve('desktop-main.cjs'),`--profile=${profile}`],env,timeout:30000});
+  const app=await _electron.launch({args:[path.resolve('src/desktop-main.cjs'),`--profile=${profile}`],env,timeout:30000});
   app.on('close',()=>closedApps.add(app));
   const page=await app.firstWindow(); await page.locator('#tab-home').waitFor();
   return {app,page};

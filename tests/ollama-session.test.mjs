@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {unloadSessionModels} from '../ollama-session.mjs';
-import {MODELS} from '../server.mjs';
+import {unloadSessionModels} from '../src/ollama-session.mjs';
+import {MODELS} from '../src/server.mjs';
 
 test('shutdown unloads only the distinct allowed models used by the session',async()=>{
   const calls=[];

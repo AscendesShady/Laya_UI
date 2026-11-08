@@ -5,7 +5,7 @@ import path from 'node:path';
 import { MODELS } from './server.mjs';
 import { unloadSessionModels } from './ollama-session.mjs';
 
-const root = path.dirname(fileURLToPath(import.meta.url));
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Identify this checkout by its Electron executable, then include only its
 // verified launcher ancestors. Never stop processes by a shared image name.
 const command = String.raw`
@@ -22,7 +22,7 @@ foreach ($item in @($targets.Values)) {
   if ($parent.Name -eq 'node.exe' -and $parent.CommandLine -match '(?:^|\s)["'']?(?:[^"'']*\\)?desktop\.mjs["'']?\s*$') {
     $targets[[int]$parent.ProcessId] = $parent
     $wrapper = $processes | Where-Object { $_.ProcessId -eq $parent.ParentProcessId } | Select-Object -First 1
-    if ($wrapper.Name -eq 'cmd.exe' -and $wrapper.CommandLine -match '(?i)/c\s+"?\.\\Start-Laya\.cmd"?\s*$') {
+    if ($wrapper.Name -eq 'cmd.exe' -and $wrapper.CommandLine -match '(?i)/c\s.*\blaunch\.bat[\s"]*$') {
       $targets[[int]$wrapper.ProcessId] = $wrapper
       $launcher = $processes | Where-Object { $_.ProcessId -eq $wrapper.ParentProcessId } | Select-Object -First 1
       if ($launcher.Name -match '^python(?:w|\d+)?\.exe$' -and ($launcher.CommandLine -replace '/', '\') -match ([regex]::Escape((Join-Path $project 'run.py')) + '["'']?\s*$')) {

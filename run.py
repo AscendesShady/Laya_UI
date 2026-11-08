@@ -13,9 +13,9 @@ def main(argv=()) -> int:
     args = parser.parse_args(argv)
     project_dir = Path(__file__).resolve().parent
     if sys.platform != "win32":
-        print("This launcher requires Windows. Use node desktop.mjs on other platforms.", file=sys.stderr)
+        print("This launcher requires Windows. Use node src/desktop.mjs on other platforms.", file=sys.stderr)
         return 1
-    script = project_dir / ("stop-laya.mjs" if args.stop else "desktop.mjs")
+    script = project_dir / "src" / ("stop-laya.mjs" if args.stop else "desktop.mjs")
     if not script.is_file():
         print(f"{script.name} is missing from the project folder.", file=sys.stderr)
         return 1

@@ -17,7 +17,7 @@ class LauncherTests(unittest.TestCase):
     def test_launches_node_directly_and_waits_for_exit(self):
         result,launch,_=self.launch(waits=(7,))
         self.assertEqual(result,7)
-        launch.assert_called_once_with(["C:\\node.exe",str(Path(run.__file__).resolve().parent/"desktop.mjs")],
+        launch.assert_called_once_with(["C:\\node.exe",str(Path(run.__file__).resolve().parent/"src"/"desktop.mjs")],
             cwd=Path(run.__file__).resolve().parent,stdin=subprocess.PIPE,text=True,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP)
 
     def test_ctrl_c_requests_save_dialog_and_waits_for_clean_exit(self):
@@ -40,7 +40,7 @@ class LauncherTests(unittest.TestCase):
     def test_stop_uses_direct_node_command(self):
         result,launch,_=self.launch(("--stop",))
         self.assertEqual(result,0)
-        self.assertEqual(launch.call_args.args[0][1],str(Path(run.__file__).resolve().parent/"stop-laya.mjs"))
+        self.assertEqual(launch.call_args.args[0][1],str(Path(run.__file__).resolve().parent/"src"/"stop-laya.mjs"))
 
     def test_missing_node_gives_an_actionable_error(self):
         with patch.object(run.sys,"platform","win32"),patch.object(run.shutil,"which",return_value=None),patch.object(run.subprocess,"Popen") as launch:
